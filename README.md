@@ -21,7 +21,7 @@ I needed the IR decoder for one project, but did not find the appropriate librar
 2. Setup ports as you needed : in IR_Receiver.h
 
 ## How to use
-
+```
 while (1)
 	{
 		cli();
@@ -33,6 +33,6 @@ while (1)
 			
 		}
 	}
-	
+```
 ## License
 MIT
