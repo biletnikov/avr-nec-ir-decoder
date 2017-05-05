@@ -11,6 +11,7 @@ The library has support of status led, which is optional. It works like an indic
 
 The library is fully emulated in Proteus. There is EasyDHL script, which models the IR transmitter.
 
+
 ## Motivation
 
 I needed the IR decoder for one project, but did not find the appropriate library and I decided to create new one.
@@ -34,5 +35,12 @@ while (1)
 		}
 	}
 ```
+
+## Schematic
+You can find the schema in the "Schematic" folder.
+The pull-up resistor R1 is optional, but recommended.
+If you avoid capacitors, it may cause lots of noise on the TSOP output pin - the receiver pulls down the pin.
+I had a noise about 1 kHz frequency without capacitors.
+
 ## License
 MIT
