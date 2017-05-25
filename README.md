@@ -43,4 +43,4 @@ If you avoid capacitors, it may cause lots of noise on the TSOP output pin - the
 I had a noise about 1 kHz frequency without capacitors.
 
 ## License
-MIT
+Apache License 2.0
