@@ -2,10 +2,11 @@
 
 It is a simple library to decode the commands from a remote control using NEC protocol for Atmel AVR microcontrollers.
 The explanation of NEC protocol can be found here : http://www.sbprojects.com/knowledge/ir/nec.php
-The library can work on Atmel AVR Atmega48/88/168 microcontrollers (without any additional adjustements).
+The library can work on Atmel AVR Atmega48/88/168 microcontrollers (without any additional adjustments).
 
 The NEC decoder is based on 16-bit timer and external interrupts (INT0 or INT1), however it can be rework for using PCI interrupts.
 The base frequency is 16 Mhz (Crystal resonator). However, it can be decreased, but the time durations must be recalculated.
+
 
 The library has support of status led, which is optional. It works like an indicator when a command received.
 
@@ -31,9 +32,56 @@ while (1)
 		if (check_result)
 		{
 			// process new command here
-			
+
 		}
 	}
+```
+
+## How to setup timer
+
+### Timer setup for 16 Mhz
+```
+// Start timer in ms
+void start_IR_timer(uint8_t time_ms)
+{
+    TCCR1A=0x0;
+    TCNT1=0x0;
+    // max resolution is 4 microseconds
+    OCR1A=((uint32_t) time_ms * 1000)/4; // it makes delay = 16 ms when Fcpu = 16 Mhz, it makes the delay enough for reading each bit according to NEC
+    TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A
+    TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
+    TIMSK1|=(1<<OCIE1A); // allow interrupts
+}
+```
+
+### Timer setup for 8 Mhz
+```
+// Start timer in ms
+void start_IR_timer(uint8_t time_ms)
+{
+    TCCR1A=0x0;
+    TCNT1=0x0;
+    // max resolution is 8 microseconds
+    OCR1A=((uint32_t) time_ms * 1000)/8;
+    TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A
+    TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
+    TIMSK1|=(1<<OCIE1A); // allow interrupts
+}
+```
+
+### Timer setup for 4 Mhz
+```
+// Start timer in ms
+void start_IR_timer(uint8_t time_ms)
+{
+    TCCR1A=0x0;
+    TCNT1=0x0;
+    // max resolution is 16 microseconds
+    OCR1A=((uint32_t) time_ms * 1000)/16; 
+    TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A
+    TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
+    TIMSK1|=(1<<OCIE1A); // allow interrupts
+}
 ```
 
 ## Schematic
