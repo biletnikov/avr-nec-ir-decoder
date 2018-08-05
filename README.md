@@ -5,7 +5,16 @@ The explanation of NEC protocol can be found here : http://www.sbprojects.com/kn
 The library can work on Atmel AVR Atmega48/88/168 microcontrollers (without any additional adjustments).
 
 The NEC decoder is based on 16-bit timer and external interrupts (INT0 or INT1), however it can be rework for using PCI interrupts.
-The base frequency is 16 Mhz (Crystal resonator). However, it can be decreased, but the time durations must be recalculated.
+The base frequency is 16 Mhz (Crystal resonator).
+The frequency can be changed and the timer setup should be adjusted automatically  (TIMER_COMPARE_VALUE) :
+
+```
+// Set here the frequency of the CPU
+#define F_CPU 16000000UL
+// Timer compare value to make the timer calculate milliseconds very well
+#define TIMER_PRESCALER 64 // check the datasheet, we use TCCR1B to set it
+#define TIMER_COMPARE_VALUE (uint16_t)( F_CPU / ((uint32_t) 1000 * TIMER_PRESCALER))
+```
 
 
 The library has support of status led, which is optional. It works like an indicator when a command received.
@@ -35,53 +44,6 @@ while (1)
 
 		}
 	}
-```
-
-## How to setup timer
-
-### Timer setup for 16 Mhz
-```
-// Start timer in ms
-void start_IR_timer(uint8_t time_ms)
-{
-    TCCR1A=0x0;
-    TCNT1=0x0;
-    // max resolution is 4 microseconds
-    OCR1A=((uint32_t) time_ms * 1000)/4; // it makes delay = 16 ms when Fcpu = 16 Mhz, it makes the delay enough for reading each bit according to NEC
-    TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A
-    TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
-    TIMSK1|=(1<<OCIE1A); // allow interrupts
-}
-```
-
-### Timer setup for 8 Mhz
-```
-// Start timer in ms
-void start_IR_timer(uint8_t time_ms)
-{
-    TCCR1A=0x0;
-    TCNT1=0x0;
-    // max resolution is 8 microseconds
-    OCR1A=((uint32_t) time_ms * 1000)/8;
-    TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A
-    TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
-    TIMSK1|=(1<<OCIE1A); // allow interrupts
-}
-```
-
-### Timer setup for 4 Mhz
-```
-// Start timer in ms
-void start_IR_timer(uint8_t time_ms)
-{
-    TCCR1A=0x0;
-    TCNT1=0x0;
-    // max resolution is 16 microseconds
-    OCR1A=((uint32_t) time_ms * 1000)/16; 
-    TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A
-    TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
-    TIMSK1|=(1<<OCIE1A); // allow interrupts
-}
 ```
 
 ## Schematic

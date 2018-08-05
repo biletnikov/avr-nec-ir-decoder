@@ -6,7 +6,12 @@
  * Author : Sergei Biletnikov
  */ 
 
+// Set here the frequency of the CPU
 #define F_CPU 16000000UL
+
+// Timer compare value to make the timer calculate milliseconds very well
+#define TIMER_PRESCALER 64 // check the datasheet, we use TCCR1B to set it
+#define TIMER_COMPARE_VALUE (uint16_t)( F_CPU / ((uint32_t) 1000 * TIMER_PRESCALER))
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -22,6 +27,7 @@
 #define PACKET_STATE_READING 1
 #define PACKET_STATE_READY 2
 #define PACKET_STATE_READ 3
+
 
 static uint8_t packet_reading_state = PACKET_STATE_NO_PACKET;
 
@@ -49,13 +55,12 @@ void reset_packet()
 	packet_reading_state = PACKET_STATE_NO_PACKET;
 }
 
-// Start timer in ms
+// Start timer in ms, if you set start_IR_timer(100);  the timer will set for 100 ms
 void start_IR_timer(uint8_t time_ms)
 {
 	TCCR1A=0x0;
 	TCNT1=0x0;	
-	// max resolution is 4 microseconds 
-	OCR1A=((uint32_t) time_ms * 1000)/4;  // it makes delay = 16 ms when Fcpu = 16 Mhz, it makes the delay enough for reading each bit according to NEC	
+	OCR1A= TIMER_COMPARE_VALUE; 
 	TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A    
 	TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
 	TIMSK1|=(1<<OCIE1A); // allow interrupts

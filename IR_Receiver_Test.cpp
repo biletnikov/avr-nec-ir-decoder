@@ -50,21 +50,20 @@ struct IR_Packet received_packet;
 
 int main(void)
 {
-	cli();
-			
-	
-	sei();
 	
 	// init uart
 	uart_init();
 	
 	init_receiver();
 	
+	sei();
+	
 	while (1)
 	{
 		cli();
 		uint8_t check_result = check_new_packet(&received_packet);
 		sei();
+		
 		if (check_result)
 		{
 			char buff[10];
