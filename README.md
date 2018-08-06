@@ -32,7 +32,16 @@ I needed the IR decoder for one project, but did not find the appropriate librar
 2. Setup ports as you needed : in IR_Receiver.h
 
 ## How to use
+When the receiver is setup properly, it is ready for working. It is continiously waiting for the signals from IR sender and decodes it properly.
+
+You have to call 'check_new_packet' routine and check the resulted flag.
+If it is not 0, it means new packet is received and you read it passing the pointer to the packet structure : &received_packet
+
 ```
+// where to store the received packet
+struct IR_Packet received_packet;
+
+
 while (1)
 	{
 		cli();
@@ -40,11 +49,18 @@ while (1)
 		sei();
 		if (check_result)
 		{
-			// process new command here
+			// now we are ready to read the packet : 
+			
+			// received_packet.addr       - address of the IR sender
+			// received_packet.command    - command code
+			// received_packet.repeat     - repeates
 
 		}
 	}
 ```
+
+If you have unknown IR device then you do not know about its command codes.
+It is recommended to use USB-to-TTL converter and IR_Receiver_Test.cpp to check and read all commands that your IR device can send to the receiver.
 
 ## Schematic
 You can find the schema in the "Schematic" folder.
