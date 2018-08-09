@@ -4,6 +4,9 @@ It is a simple library to decode the commands from a remote control using NEC pr
 The explanation of NEC protocol can be found here : http://www.sbprojects.com/knowledge/ir/nec.php
 The library can work on Atmel AVR Atmega48/88/168 microcontrollers (without any additional adjustments).
 
+The main idea of the library to work in the background, using an interrupt and timer to read data from an IR transmitter device.
+You should check the receiving status periodically and when the new NEC packet is arrived, you can grab it for the further processing.
+
 The NEC decoder is based on 16-bit timer and external interrupts (INT0 or INT1), however it can be rework for using PCI interrupts.
 The base frequency is 16 Mhz (Crystal resonator).
 The frequency can be changed and the timer setup should be adjusted automatically  (TIMER_COMPARE_VALUE) :
@@ -17,7 +20,7 @@ The frequency can be changed and the timer setup should be adjusted automaticall
 ```
 
 
-The library has support of status led, which is optional. It works like an indicator when a command received.
+The library has support for a status led, which is optional. It blinks when a command received.
 
 The library is fully emulated in Proteus. There is EasyDHL script, which models the IR transmitter.
 
@@ -41,10 +44,10 @@ If it is not 0, it means new packet is received and you read it passing the poin
 // where to store the received packet
 struct IR_Packet received_packet;
 
-
 while (1)
 	{
 		cli();
+		// we have to call this function periodically, when CPU is not busy for other routines, the 'check_result' is flag, which is not 0 when new packet is arrived
 		uint8_t check_result = check_new_packet(&received_packet);
 		sei();
 		if (check_result)
