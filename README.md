@@ -47,7 +47,8 @@ struct IR_Packet received_packet;
 while (1)
 	{
 		cli();
-		// we have to call this function periodically, when CPU is not busy for other routines, the 'check_result' is flag, which is not 0 when new packet is arrived
+		// we have to call this function periodically, when CPU is not busy for other routines, 
+		// the 'check_result' is a flag, which is not equal to 0 when new packet is arrived
 		uint8_t check_result = check_new_packet(&received_packet);
 		sei();
 		if (check_result)
