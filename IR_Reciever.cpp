@@ -11,7 +11,8 @@
 
 // Timer compare value to make the timer calculate milliseconds very well
 #define TIMER_PRESCALER 64 // check the datasheet, we use TCCR1B to set it
-#define TIMER_COMPARE_VALUE (uint16_t)( F_CPU / ((uint32_t) 1000 * TIMER_PRESCALER))
+// The timer compare value which corresponds to the 1 ms (approx)
+#define TIMER_COMPARE_VALUE_ONE_MS (uint16_t)( F_CPU / ((uint32_t) 1000 * TIMER_PRESCALER)) 
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -39,8 +40,8 @@ static uint8_t read_bit_counter = 0;
 // receiving packet of data
 static IR_Packet packet;
 // pulse and delay length
-static uint16_t pulse_time = 0;
-static uint16_t pause_time = 0;
+static uint16_t pulse_time_counter = 0;
+static uint16_t pause_time_counter = 0;
 
 // reset packet data
 void reset_packet()
@@ -60,7 +61,7 @@ void start_IR_timer(uint8_t time_ms)
 {
 	TCCR1A=0x0;
 	TCNT1=0x0;	
-	OCR1A= TIMER_COMPARE_VALUE; 
+	OCR1A= TIMER_COMPARE_VALUE_ONE_MS * time_ms; 
 	TCCR1B|=(1<<WGM12); // CTC mode -> TCNT1 = OCR1A    
 	TCCR1B|=(1<<CS10)|(1<<CS11); // prescaler 64
 	TIMSK1|=(1<<OCIE1A); // allow interrupts
@@ -83,8 +84,8 @@ void reset_IR_receiver()
 			
 	reset_packet();
 	
-	pulse_time = 0;
-	pause_time = 0;
+	pulse_time_counter = 0;
+	pause_time_counter = 0;
 }
 
 void on_start_bit()
@@ -159,33 +160,33 @@ void on_repeat_command()
 
 void read_chunk()
 {
-	if (pulse_time > 0 && pause_time > 0)
+	if (pulse_time_counter > 0 && pause_time_counter > 0)
 	{
 		// pulse 7 ms (1750) - 11 ms (2750) 		
-		if (pulse_time > 1750 && pulse_time < 2750) {
+		if (pulse_time_counter > (7 * TIMER_COMPARE_VALUE_ONE_MS) && pulse_time_counter < (11 * TIMER_COMPARE_VALUE_ONE_MS)) {
 			
 			// pause 3.2 ms (800) - 6 ms (1500) 
-			if (pause_time > 800 && pause_time < 1500)
+			if (pause_time_counter > (3.2 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (6 * TIMER_COMPARE_VALUE_ONE_MS))
 			{
 				// start bit
 				on_start_bit();
 			} 
 			// pause 1.6 ms (400) - 3.2 ms (800)
-			else if (pause_time > 400 && pause_time <= 800)
+			else if (pause_time_counter > (1.6 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter <= (3.2 * TIMER_COMPARE_VALUE_ONE_MS))
 			{
 				// command repeat
 				on_repeat_command();
 			}						
 		}
 		// pulse 360 microseconds (90) - 760 microseconds (190)		
-		else if (pulse_time > 90 && pulse_time < 190){
+		else if (pulse_time_counter > 0.36 * TIMER_COMPARE_VALUE_ONE_MS && pulse_time_counter < (0.76 * TIMER_COMPARE_VALUE_ONE_MS)){
 			// pause 1.5 ms (375) - 1.9 ms (475)
-			if (pause_time > 375 && pause_time < 475) {
+			if (pause_time_counter > (1.5 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (1.9 * TIMER_COMPARE_VALUE_ONE_MS)) {
 				// data bit = 1							
 				on_data_bit(1);
 			} 
 			// pause 360 microseconds (90) - 760 microseconds (190)
-			else if (pause_time > 90 && pause_time < 190) {
+			else if (pause_time_counter > (0.36 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (0.76 * TIMER_COMPARE_VALUE_ONE_MS)) {
 				// data bit = 0
 				on_data_bit(0);
 			}
@@ -224,26 +225,26 @@ ISR(INT0_vect)
 	uint8_t rising_edge = (IRR_PIN_PORT & (1<<IRR_PIN));
 	if (rising_edge) {
 		// rising edge interrupt, read the counter value -> duration of pulse
-		pulse_time = TCNT1;
+		pulse_time_counter = TCNT1;
 		// reset counter
 		TCNT1 = 0;
 	} else {
 		// falling edge interrupt
-		if (pulse_time == 0)
+		if (pulse_time_counter == 0)
 		{
 			// new data chunk receiving, start timer to handle problem packets
 			start_IR_timer(MAX_BIT_TRANSMISSION_DELAY);
 			
 			} else {
 			// keep pause duration
-			pause_time = TCNT1;
+			pause_time_counter = TCNT1;
 			// reset counter
 			TCNT1 = 0;
 			// read the piece of data received
 			read_chunk();
 			//
-			pulse_time = 0;
-			pause_time = 0;
+			pulse_time_counter = 0;
+			pause_time_counter = 0;
 		}
 	}
 }

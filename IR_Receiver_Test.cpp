@@ -17,14 +17,14 @@
 
 // define some macros
 #define BAUD 9600                                   // define baud
-#define BAUDRATE ((F_CPU)/(BAUD*16UL)-1)            // set baud rate value for UBRR
+#define UBRR ((F_CPU)/(BAUD*16UL)-1)            // set baud rate value for UBRR
 
 // function to initialize UART
 void uart_init (void)
 {
-	//UBRR0H = (BAUDRATE>>8);                      // shift the register right by 8 bits
-	//UBRR0L = BAUDRATE;                           // set baud rate
-	UBRR0 = BAUDRATE;
+	//UBRR0H = (UBRR>>8);                      // shift the register right by 8 bits
+	//UBRR0L = UBRR;                           // set baud rate
+	UBRR0 = UBRR;
 	UCSR0B|= (1<<TXEN0)|(1<<RXEN0);                // enable receiver and transmitter
 	UCSR0C|= (1<<UCSZ00)|(1<<UCSZ01);   // 8bit data format
 }
@@ -79,6 +79,6 @@ int main(void)
 			usart_transmit_str("R : ");
 			usart_transmit_str(buff);
 			usart_transmit_str("\n\r");
-		}		
+		}
 	}
 }
