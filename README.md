@@ -8,8 +8,12 @@ The main idea of the library to work in the background, using an interrupt and t
 You should check the receiving status periodically and when the new NEC packet is arrived, you can grab it for the further processing.
 
 The NEC decoder is based on 16-bit timer and external interrupts (INT0 or INT1), however it can be rework for using PCI interrupts.
-The base frequency is 16 Mhz (Crystal resonator).
-The frequency can be changed and the timer setup should be adjusted automatically  (TIMER_COMPARE_VALUE) :
+The library was tested on Atmega88p and must work on Atmega168 and Atmega328
+
+Timeouts are calcualted dufring the complilation and based on the CPU frequency.
+F_CPU must be set.  The example has 16 Mhz. The library was tested with 8 Mhz, but it shuld work normally on any frequency 1-20 Mhz, 
+if you set F_CPU correctly, otherwise the timings will be wrong and packets will be lost.
+
 
 ```
 // Set here the frequency of the CPU
@@ -32,7 +36,8 @@ I needed the IR decoder for one project, but did not find the appropriate librar
 ## Installation
 
 1. Add header to your project : #include "IR_Receiver.h"
-2. Setup ports as you needed : in IR_Receiver.h
+2. Setup ports as you needed : in "IR_Receiver.h"
+3. You can enable a led which is blinks when new packet is comming.
 
 ## How to use
 When the receiver is setup properly, it is ready for working. It is continiously waiting for the signals from IR sender and decodes it properly.
@@ -63,8 +68,12 @@ while (1)
 	}
 ```
 
-If you have unknown IR device then you do not know about its command codes.
-It is recommended to use USB-to-TTL converter and IR_Receiver_Test.cpp to check and read all commands that your IR device can send to the receiver.
+If you have unknown IR device then you need to know its commands. For that, you can run a test application : IR_Receiver_Test.cpp,
+whic will connect MCU via UART to the PC (use USB-to-TTL converter can be used).
+Run serial monitor (like in Arduino) or any other tool to read the messages from the MCU.
+Press buttons on your Remote control and see the actual commands on the PC.
+When you know all commands and the device address, you can programm them.
+I would suggest to create "IR_XXX_Control.h" file and put all commands there.
 
 ## Schematic
 You can find the schema in the "Schematic" folder.
