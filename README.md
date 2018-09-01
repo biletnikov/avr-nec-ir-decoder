@@ -80,6 +80,8 @@ You can find the schema in the "Schematic" folder.
 The pull-up resistor R1 is optional, but recommended.
 If you avoid capacitors, it may cause lots of noise on the TSOP output pin - the receiver pulls down the pin.
 I had a noise about 1 kHz frequency without capacitors.
+A noise adds overhead to your device, because MCU will process the noise signals in attempt to find any packet from it, 
+instead of working on something more important.
 
 ## License
 Apache License 2.0
