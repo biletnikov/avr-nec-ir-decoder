@@ -27,15 +27,14 @@ EIMSK|=(1<<INT0);
 //uncomment this to use a led to indicate when IR packet received, it blinks shortly for 100 ms
 //#define IR_STATUS_LED
 
+// Status led initialization, if it is defined
 #ifdef IR_STATUS_LED
-
 #define IR_STATUS_LED_PORT PORTB
 #define IR_STATUS_LED_DDR DDRB
 #define IR_STATUS_LED_PIN PB1
 #define IR_STATUS_LED_ON IR_STATUS_LED_PORT|=(1<<IR_STATUS_LED_PIN)
 #define IR_STATUS_LED_OFF IR_STATUS_LED_PORT&=~(1<<IR_STATUS_LED_PIN)
 #define IR_STATUS_LED_TOGGLE IR_STATUS_LED_PORT^=(1<<IR_STATUS_LED_PIN)
-
 #endif // IR_STATUS_LED
 
 

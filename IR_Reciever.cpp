@@ -7,7 +7,9 @@
  */ 
 
 // Set here the frequency of the CPU
+#ifndef F_CPU
 #define F_CPU 16000000UL
+#endif
 
 // Timer compare value to make the timer calculate milliseconds very well
 #define TIMER_PRESCALER 64 // check the datasheet, we use TCCR1B to set it
@@ -20,6 +22,8 @@
 
 #include "IR_Receiver.h"
 
+// We have to set the maximum time for the data transmission, after this time, the packet must be rejected
+// it helps to avoid program stopping when data transmission was corrupted or interrupted
 #define MAX_DELAY_FOR_REPEAT_COMMAND 100 // in ms
 #define MAX_BIT_TRANSMISSION_DELAY 16 // in ms
 
@@ -56,7 +60,7 @@ void reset_packet()
 	packet_reading_state = PACKET_STATE_NO_PACKET;
 }
 
-// Start timer in ms, if you set start_IR_timer(100);  the timer will set for 100 ms
+// Start timer in ms, if you set start_IR_timer(100);  the timer will set for 100 ms and is ended with the interruption
 void start_IR_timer(uint8_t time_ms)
 {
 	TCCR1A=0x0;
@@ -74,7 +78,7 @@ void stop_IR_timer()
 	TCCR1B&=~(1<<CS12);
 	
 	#ifdef IR_STATUS_LED
-	IR_STATUS_LED_OFF;
+		IR_STATUS_LED_OFF;
 	#endif
 }
 
@@ -140,13 +144,14 @@ void on_data_bit(uint8_t bit)
 	}		
 }
 
+// process repeat command, it happens when a button is pressed for a longer period of time
 void on_repeat_command()
 {
 	if (packet_reading_state == PACKET_STATE_READY || packet_reading_state == PACKET_STATE_READ)
 	{
 		if (packet.repeat < 255)
 		{			
-			packet.repeat++; // repeat counter up
+			packet.repeat++; // repeat counter up, repeat command maybe send it sequence
 		}
 		packet_reading_state = PACKET_STATE_READY;
 		
@@ -219,7 +224,7 @@ extern uint8_t check_new_packet(IR_Packet * received_packet)
 ISR(INT0_vect)
 {
 	#ifdef IR_STATUS_LED
-	IR_STATUS_LED_ON;
+		IR_STATUS_LED_ON;
 	#endif
 	
 	uint8_t rising_edge = (IRR_PIN_PORT & (1<<IRR_PIN));

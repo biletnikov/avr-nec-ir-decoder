@@ -83,5 +83,11 @@ I had a noise about 1 kHz frequency without capacitors.
 A noise adds overhead to your device, because MCU will process the noise signals in attempt to find any packet from it, 
 instead of working on something more important.
 
+## Plans for the future
+Support both timers : 8 bit and 16 bit, and use either one by demand. It is essential, because some devices may really needs 16-bit timer 
+for their main tasks.
+
+ATTiny support :  maybe attiny2313, attiny85 and even attiny13.
+
 ## License
 Apache License 2.0

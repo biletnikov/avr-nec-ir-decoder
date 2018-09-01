@@ -64,6 +64,9 @@ int main(void)
 		uint8_t check_result = check_new_packet(&received_packet);
 		sei();
 		
+		usart_transmit_str("Ready :");
+		usart_transmit_str("\n\r");
+		
 		if (check_result)
 		{
 			char buff[10];
