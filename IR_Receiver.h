@@ -55,6 +55,6 @@ extern void init_receiver();
 // 0 - no, otherwise yes
 // received_packet is a pointer to the IR_Packet structure to receive the data
 // the packet updated only if the function result is not 0
-extern uint8_t check_new_packet(IR_Packet * received_packet);
+extern uint8_t check_new_packet(struct IR_Packet * received_packet);
 
 #endif /* IR_RECEIVER_H_ */

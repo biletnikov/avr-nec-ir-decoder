@@ -42,7 +42,7 @@ static uint8_t packet_reading_state = PACKET_STATE_NO_PACKET;
 static uint8_t read_bit_counter = 0;
 
 // receiving packet of data
-static IR_Packet packet;
+static struct IR_Packet packet;
 // pulse and delay length
 static uint16_t pulse_time_counter = 0;
 static uint16_t pause_time_counter = 0;
@@ -203,7 +203,7 @@ void read_chunk()
 // 0 - no, otherwise yes
 // received_packet is a pointer to the IR_Packet structure to receive the data
 // the packet updated only if the function result is not 0
-extern uint8_t check_new_packet(IR_Packet * received_packet)
+extern uint8_t check_new_packet(struct IR_Packet * received_packet)
 {
 	if (packet_reading_state == PACKET_STATE_READY)
 	{
