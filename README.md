@@ -75,6 +75,43 @@ Press buttons on your Remote control and see the actual commands on the PC.
 When you know all commands and the device address, you can programm them.
 I would suggest to create "IR_XXX_Control.h" file and put all commands there.
 
+### Repeated commands
+According to the NEC standard, commands maybe repeated, usually it happens when button on the IR transiver is pressed for some time.
+It is handy when you controll the light dimmer slowly changing PWM duty.
+Actually the command is sent once and after that special repeat signal will be sent periodically.
+
+To process this case, the "repeat" counter per each command is used.
+if (received_packet.repeat == 0)   the command is sent without repeat
+if (received_packet.repeat > 0)    it is repeat of the command
+
+We will receive the same command but with the incremented received_packet.repeat field.
+
+If you need to avoid repititions, just filter out commands with received_packet.repeat > 0.
+
+Example:
+```
+if (check_result)
+{
+   // new packet received
+   if (received_packet.command == RELAY_TURN_ON_COMMAND)
+   {
+       // we do not need repetitions for this command
+       if (received_packet.repeat == 0)
+       {
+          //ok, it is not repetition
+       } 
+   
+   } else if (received_packet.command == LIGHT_BRIGHTER)
+    {
+        // but here we need repetitions
+		if (received_packet.repeat > 0)
+		{
+			// do something 
+		}
+    }
+}
+```
+
 ## Schematic
 You can find the schema in the "Schematic" folder.
 The pull-up resistor R1 is optional, but recommended.
