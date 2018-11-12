@@ -62,24 +62,21 @@ int main(void)
 	{
 		cli();
 		uint8_t check_result = check_new_packet(&received_packet);
-		sei();
-		
-		usart_transmit_str("Ready :");
-		usart_transmit_str("\n\r");
+		sei();		
 		
 		if (check_result)
 		{
 			char buff[10];
 			utoa(received_packet.addr, buff, 16);
-			usart_transmit_str("A : ");
+			usart_transmit_str("A: "); // Address of the sending device
 			usart_transmit_str(buff);
-			usart_transmit_str(" ");
+			usart_transmit_str("  ");
 			utoa(received_packet.command, buff, 16);
-			usart_transmit_str("C : ");
+			usart_transmit_str("C: "); // Command code
 			usart_transmit_str(buff);
-			usart_transmit_str(" ");
+			usart_transmit_str("  ");
 			utoa(received_packet.repeat, buff, 10);
-			usart_transmit_str("R : ");
+			usart_transmit_str("R: "); // Command repeat counter
 			usart_transmit_str(buff);
 			usart_transmit_str("\n\r");
 		}

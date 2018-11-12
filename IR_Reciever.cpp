@@ -27,12 +27,11 @@
 #define MAX_DELAY_FOR_REPEAT_COMMAND 100 // in ms
 #define MAX_BIT_TRANSMISSION_DELAY 16 // in ms
 
-// packet receiving state
+// packet reading state
 #define PACKET_STATE_NO_PACKET 0
 #define PACKET_STATE_READING 1
 #define PACKET_STATE_READY 2
 #define PACKET_STATE_READ 3
-
 
 static uint8_t packet_reading_state = PACKET_STATE_NO_PACKET;
 
@@ -76,10 +75,6 @@ void stop_IR_timer()
 	TCCR1B&=~(1<<CS10);
 	TCCR1B&=~(1<<CS11);		
 	TCCR1B&=~(1<<CS12);
-	
-	#ifdef IR_STATUS_LED
-		IR_STATUS_LED_OFF;
-	#endif
 }
 
 void reset_IR_receiver()
@@ -90,6 +85,10 @@ void reset_IR_receiver()
 	
 	pulse_time_counter = 0;
 	pause_time_counter = 0;
+	
+	#ifdef IR_STATUS_LED
+		IR_STATUS_LED_OFF;
+	#endif
 }
 
 void on_start_bit()
@@ -116,16 +115,20 @@ void on_data_bit(uint8_t bit)
 	{
 		if (bit)
 		{			
-			if (read_bit_counter < 8) {
+			if (read_bit_counter < 8) 
+			{
 				// address reading
 				packet.addr |= (1<<read_bit_counter);
-			} else if (read_bit_counter >=8 && read_bit_counter < 16) {
+			} else if (read_bit_counter >=8 && read_bit_counter < 16) 
+			{
 				// inverting address reading
 				packet.addr_inv |= (1<<(read_bit_counter - 8));
-			} else if (read_bit_counter >= 16 && read_bit_counter < 24) {
+			} else if (read_bit_counter >= 16 && read_bit_counter < 24) 
+			{
 				// command reading
 				packet.command |= (1<<(read_bit_counter - 16));
-			} else if (read_bit_counter >= 24) {
+			} else if (read_bit_counter >= 24) 
+			{
 				// inverting command reading
 				packet.command_inv |= (1<<(read_bit_counter - 24));
 			}
@@ -133,7 +136,8 @@ void on_data_bit(uint8_t bit)
 		
 		read_bit_counter++;
 		
-		if (read_bit_counter == NEC_MAX_PACKET_BIT_NUMBER) {					
+		if (read_bit_counter == NEC_MAX_PACKET_BIT_NUMBER) 
+		{					
 			// the packet is read, validate
 			if (((packet.addr + packet.addr_inv) == 0xFF) && ((packet.command + packet.command_inv) == 0xFF))
 			{
@@ -156,7 +160,9 @@ void on_repeat_command()
 		packet_reading_state = PACKET_STATE_READY;
 		
 		start_IR_timer(MAX_DELAY_FOR_REPEAT_COMMAND); // wait next repeat command
-	} else {
+	} 
+	else 
+	{
 		//  problem, invalid protocol, reset receiver
 		reset_IR_receiver();
 		reset_packet();
@@ -168,8 +174,8 @@ void read_chunk()
 	if (pulse_time_counter > 0 && pause_time_counter > 0)
 	{
 		// pulse 7 ms (1750) - 11 ms (2750) 		
-		if (pulse_time_counter > (7 * TIMER_COMPARE_VALUE_ONE_MS) && pulse_time_counter < (11 * TIMER_COMPARE_VALUE_ONE_MS)) {
-			
+		if (pulse_time_counter > (7 * TIMER_COMPARE_VALUE_ONE_MS) && pulse_time_counter < (11 * TIMER_COMPARE_VALUE_ONE_MS)) 
+		{			
 			// pause 3.2 ms (800) - 6 ms (1500) 
 			if (pause_time_counter > (3.2 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (6 * TIMER_COMPARE_VALUE_ONE_MS))
 			{
@@ -184,14 +190,17 @@ void read_chunk()
 			}						
 		}
 		// pulse 360 microseconds (90) - 760 microseconds (190)		
-		else if (pulse_time_counter > 0.36 * TIMER_COMPARE_VALUE_ONE_MS && pulse_time_counter < (0.76 * TIMER_COMPARE_VALUE_ONE_MS)){
+		else if (pulse_time_counter > 0.36 * TIMER_COMPARE_VALUE_ONE_MS && pulse_time_counter < (0.76 * TIMER_COMPARE_VALUE_ONE_MS))
+		{
 			// pause 1.5 ms (375) - 1.9 ms (475)
-			if (pause_time_counter > (1.5 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (1.9 * TIMER_COMPARE_VALUE_ONE_MS)) {
+			if (pause_time_counter > (1.5 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (1.9 * TIMER_COMPARE_VALUE_ONE_MS)) 
+			{
 				// data bit = 1							
 				on_data_bit(1);
 			} 
 			// pause 360 microseconds (90) - 760 microseconds (190)
-			else if (pause_time_counter > (0.36 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (0.76 * TIMER_COMPARE_VALUE_ONE_MS)) {
+			else if (pause_time_counter > (0.36 * TIMER_COMPARE_VALUE_ONE_MS) && pause_time_counter < (0.76 * TIMER_COMPARE_VALUE_ONE_MS)) 
+			{
 				// data bit = 0
 				on_data_bit(0);
 			}
@@ -223,24 +232,24 @@ extern uint8_t check_new_packet(struct IR_Packet * received_packet)
 // external interrupt
 ISR(INT0_vect)
 {
-	#ifdef IR_STATUS_LED
-		IR_STATUS_LED_ON;
-	#endif
-	
 	uint8_t rising_edge = (IRR_PIN_PORT & (1<<IRR_PIN));
-	if (rising_edge) {
+	if (rising_edge) 
+	{
 		// rising edge interrupt, read the counter value -> duration of pulse
 		pulse_time_counter = TCNT1;
 		// reset counter
 		TCNT1 = 0;
-	} else {
+	} 
+	else 
+	{
 		// falling edge interrupt
 		if (pulse_time_counter == 0)
 		{
 			// new data chunk receiving, start timer to handle problem packets
-			start_IR_timer(MAX_BIT_TRANSMISSION_DELAY);
-			
-			} else {
+			start_IR_timer(MAX_BIT_TRANSMISSION_DELAY);			
+		} 
+		else 
+		{
 			// keep pause duration
 			pause_time_counter = TCNT1;
 			// reset counter
