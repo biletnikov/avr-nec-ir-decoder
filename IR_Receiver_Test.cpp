@@ -61,24 +61,34 @@ int main(void)
 	while (1)
 	{
 		cli();
-		uint8_t check_result = check_new_packet(&received_packet);
+		uint8_t check_result = check_new_packet(&received_packet);		
 		sei();		
 		
 		if (check_result)
 		{
 			char buff[10];
-			utoa(received_packet.addr, buff, 16);
-			usart_transmit_str("A: "); // Address of the sending device
-			usart_transmit_str(buff);
-			usart_transmit_str("  ");
-			utoa(received_packet.command, buff, 16);
-			usart_transmit_str("C: "); // Command code
-			usart_transmit_str(buff);
-			usart_transmit_str("  ");
-			utoa(received_packet.repeat, buff, 10);
-			usart_transmit_str("R: "); // Command repeat counter
-			usart_transmit_str(buff);
-			usart_transmit_str("\n\r");
+			if (received_packet.repeat > 0)
+			{
+				utoa(received_packet.repeat, buff, 10);
+				usart_transmit_str(" R: "); // Command repeat counter
+				usart_transmit_str(buff);
+			} else
+			{
+				usart_transmit_str("\n\r");
+				utoa(received_packet.addr, buff, 16);
+				usart_transmit_str("A: "); // Address of the sending device
+				usart_transmit_str(buff);
+				usart_transmit_str("  ");
+				utoa(received_packet.command, buff, 16);
+				usart_transmit_str("C: "); // Command code
+				usart_transmit_str(buff);
+				usart_transmit_str("  ");
+				utoa(received_packet.repeat, buff, 10);
+				usart_transmit_str("R: "); // Command repeat counter
+				usart_transmit_str(buff);				
+			}			
 		}
+		
+		_delay_ms(50);
 	}
 }

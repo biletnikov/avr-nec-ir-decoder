@@ -21,7 +21,6 @@ IRR_PORT|=(1<<IRR_PIN); \
 EICRA|=(1<<ISC00); \
 EIMSK|=(1<<INT0);
 //
-
 #define NEC_MAX_PACKET_BIT_NUMBER 32
 
 //uncomment this to use a led to indicate when IR packet received, it blinks shortly for 100 ms
@@ -41,11 +40,9 @@ EIMSK|=(1<<INT0);
 // Packet of data
 struct IR_Packet
 {
-	uint8_t addr; // address
-	uint8_t addr_inv; // inverted address
+	uint16_t addr; // address, for standard NEC it is only one byte address (the value in the lowest byte), for extended protocol the address takes 2 bytes
 	uint8_t command; // command 
-	uint8_t command_inv; // inverted command
-	uint8_t repeat; // 0 if the packet is not repeat
+	uint8_t repeat; // 0 if the packet is not repeat	
 };
 
 // init receiver

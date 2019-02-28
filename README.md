@@ -28,6 +28,14 @@ The library has support for a status led, which is optional. It blinks when a co
 
 The library is fully emulated in Proteus. There is EasyDHL script, which models the IR transmitter.
 
+## News
+
+I have updated the library on 28 Feb 2019.
+The new version has support for Extended NEC protocol. It means more remote control devices can work with the library.
+Thanks to Chris Trottier who sent me a RC with such protocol for testing.
+
+The new version has improved error handling with using timeouts in any phase of the data transimission. It means, in case of 
+failed transimssion the receiver library will reset itself as soon as possible with timeouts.
 
 ## Motivation
 
@@ -74,6 +82,35 @@ Run serial monitor (like in Arduino) or any other tool to read the messages from
 Press buttons on your Remote control and see the actual commands on the PC.
 When you know all commands and the device address, you can programm them.
 I would suggest to create "IR_XXX_Control.h" file and put all commands there.
+
+#### How IR_Receiver_Test.cpp  output looks like:
+
+```
+A: 6186  C: 13  R: 0
+
+A: 6186  C: f  R: 0
+
+A: 6186  C: 10  R: 0 R: 1 R: 2 R: 3 R: 4 R: 5
+
+A: 6186  C: 13  R: 0 R: 1
+
+A: 6186  C: 12  R: 0
+
+A: 6186  C: f  R: 0
+
+A: 6186  C: 15  R: 0
+
+A: 6186  C: 19  R: 0
+
+A: 6186  C: 10  R: 0
+
+A: 6186  C: 12  R: 0
+```
+
+A: 6186 - the device address
+C: 13 - is a command code
+R: 0   no repeats
+A: 6186  C: 10  R: 0 R: 1 R: 2 R: 3 R: 4 R: 5     (Command 10  from device 6186  and 5 repeats)
 
 ### Repeated commands
 According to the NEC standard, commands maybe repeated, usually it happens when button on the IR transiver is pressed for some time.
