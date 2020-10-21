@@ -17,7 +17,7 @@
 
 // define some macros
 #define BAUD 9600                                   // define baud
-#define UBRR ((F_CPU)/(BAUD*16UL)-1)            // set baud rate value for UBRR
+#define UBRR (((F_CPU)/(BAUD*16UL))-1)          // set baud rate value for UBRR
 
 // function to initialize UART
 void uart_init (void)
